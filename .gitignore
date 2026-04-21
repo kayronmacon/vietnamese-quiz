@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+.vscode/
+.idea/
+
+# Local learning progress — personal to each user, shouldn't be shared
+vietnamese_progress.json
