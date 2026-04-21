@@ -92,6 +92,32 @@ You should see the main menu. Pick **d** for Daily Practice and you're off.
 
 Your streak, words seen, and accuracy are saved to `vietnamese_progress.json` next to the script. Delete that file to start fresh.
 
+## Updating the app
+
+New words and features get added over time. Here's how to pull them in without losing your streak:
+
+### If you cloned with git
+From inside the app folder:
+```
+git pull
+```
+Your `vietnamese_progress.json` is ignored by git, so it stays untouched.
+
+### If you downloaded the ZIP
+1. **Save your progress file first.** Copy `vietnamese_progress.json` out of the app folder (to your Desktop, say).
+2. Re-download the latest ZIP from the repo's GitHub page → **Code** → **Download ZIP**.
+3. Unzip it, replacing the old folder.
+4. Copy your saved `vietnamese_progress.json` back into the new folder.
+
+> **Tip:** If you plan to update often, cloning with git is much easier — one `git pull` and you're current.
+
+### After updating
+If a new version adds new audio dependencies or libraries, re-run:
+```
+pip install -r requirements.txt
+```
+(If there's no `requirements.txt`, just re-run `pip install gTTS pygame` to make sure you're current.)
+
 ## Troubleshooting
 
 - **"No audio plays"** — make sure you ran `pip install gTTS pygame` for the same Python you're running the script with. gTTS also needs an internet connection to fetch audio. If you see an error message when you type `say`, it will tell you what went wrong.
