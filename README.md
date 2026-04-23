@@ -1,10 +1,11 @@
 # Vietnamese Learning Quiz
 
-A terminal quiz for learning everyday Vietnamese (Southern accent). ~280 words and phrases across 18 categories, with fuzzy answer matching, automatic audio playback, daily streak tracking, and a weak-words review mode so you can come back day after day.
+A terminal quiz for learning everyday Vietnamese (Southern accent). ~350 words, phrases, and sentence patterns across 21 categories — designed as a beginner's entry point. If you can answer all of these, you've got a solid basic grasp of the language. Fuzzy answer matching, automatic audio playback, daily streak tracking, and a weak-words review mode keep you coming back day after day.
 
 ## Features
 
-- **18 categories**: numbers, addressing people by age, daily phrases, question words, common verbs, adjectives, ordering, food, shopping, family, emotions, body parts, colors, time, weather, places, transportation, directions
+- **21 categories** covering the basics: numbers, particles & grammar glue, addressing people by age, daily phrases, question words, connectors & prepositions, common verbs, adjectives, sentence patterns, ordering, food, shopping, family, emotions, body parts, colors, time, weather, places, transportation, directions
+- **Beginner-first** — entries focus on the core words a learner actually needs to start speaking, including classifiers (cái/con/chiếc), demonstratives (này/đó/kia), and ready-made sentence patterns
 - **Auto-play audio** — hear each Vietnamese word when the question appears
 - **Fuzzy answer matching** — typos and short variants ("how r u" for "How are you?") still count
 - **Daily Practice mode** — auto-mixes weak words with new ones

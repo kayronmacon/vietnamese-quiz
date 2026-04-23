@@ -17,7 +17,40 @@ except Exception as e:
     TTS_ERROR = f"{type(e).__name__}: {e}"
 
 
-PROGRESS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vietnamese_progress.json")
+def _resolve_progress_file():
+    """Pick a writable location for progress.
+
+    Prefers the script's own folder (so progress sits next to the app) but
+    falls back to the user's home folder if that's not writable — sandboxed
+    Pythons (e.g. Microsoft Store) and cloud-synced folders often block
+    writes to the script dir."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    preferred = os.path.join(script_dir, "vietnamese_progress.json")
+
+    # If a progress file already exists in the script dir, keep using it.
+    if os.path.exists(preferred):
+        return preferred
+
+    # Probe writability with a tiny temp file.
+    try:
+        probe = os.path.join(script_dir, ".vnquiz_write_probe")
+        with open(probe, "w") as f:
+            f.write("")
+        os.remove(probe)
+        return preferred
+    except OSError:
+        pass
+
+    # Fallback: user-writable location.
+    home_dir = os.path.join(os.path.expanduser("~"), ".vietnamese-quiz")
+    try:
+        os.makedirs(home_dir, exist_ok=True)
+    except OSError:
+        home_dir = os.path.expanduser("~")
+    return os.path.join(home_dir, "vietnamese_progress.json")
+
+
+PROGRESS_FILE = _resolve_progress_file()
 SIMILARITY_THRESHOLD = 0.8
 
 
@@ -435,21 +468,172 @@ vocabulary = {
         {"vietnamese": "Bớt chút được không?", "english": "Can you lower the price a bit?", "pronunciation": "buht chut duok khom", "accept": ["lower price", "cheaper", "discount it", "bargain"]},
         {"vietnamese": "Hóa đơn", "english": "Receipt / bill", "pronunciation": "hwa duhn", "accept": ["receipt", "bill", "invoice"]},
     ],
+    "basics": [
+        {"vietnamese": "Là", "english": "To be (is / am / are)", "pronunciation": "la",
+         "accept": ["is", "am", "are", "to be", "be"]},
+        {"vietnamese": "Có", "english": "To have / there is", "pronunciation": "co",
+         "accept": ["have", "there is", "there are", "has"]},
+        {"vietnamese": "Không", "english": "Not (negation)", "pronunciation": "khom",
+         "accept": ["not", "negation", "dont", "no (negation)"]},
+        {"vietnamese": "Của", "english": "Of / belonging to", "pronunciation": "kua",
+         "accept": ["of", "belonging to", "possessive", "s (possessive)"]},
+        {"vietnamese": "Này", "english": "This", "pronunciation": "nai", "accept": ["this"]},
+        {"vietnamese": "Đó", "english": "That", "pronunciation": "do", "accept": ["that"]},
+        {"vietnamese": "Kia", "english": "That (over there)", "pronunciation": "kya",
+         "accept": ["that over there", "yonder", "that one"]},
+        {"vietnamese": "Đây", "english": "Here / this one", "pronunciation": "day",
+         "accept": ["here", "this one", "here it is"]},
+        {"vietnamese": "Rất", "english": "Very (before adjective)", "pronunciation": "rut",
+         "accept": ["very", "rly"]},
+        {"vietnamese": "Quá", "english": "Too / very (after adjective)", "pronunciation": "kwa",
+         "accept": ["too", "very", "so"]},
+        {"vietnamese": "Lắm", "english": "A lot / very (after adjective)", "pronunciation": "lam",
+         "accept": ["a lot", "very", "much"]},
+        {"vietnamese": "Hơi", "english": "A bit / slightly", "pronunciation": "huy",
+         "accept": ["a bit", "slightly", "kind of", "somewhat"]},
+        {"vietnamese": "Cũng", "english": "Also / too", "pronunciation": "kung",
+         "accept": ["also", "too", "as well"]},
+        {"vietnamese": "Chỉ", "english": "Only / just", "pronunciation": "chee",
+         "accept": ["only", "just"]},
+        {"vietnamese": "Cái", "english": "Classifier for objects (the / a)", "pronunciation": "kai",
+         "accept": ["classifier", "the", "a (object)", "thing classifier"]},
+        {"vietnamese": "Con", "english": "Classifier for animals / people", "pronunciation": "kon",
+         "accept": ["animal classifier", "the (animal)", "classifier for animals"]},
+        {"vietnamese": "Chiếc", "english": "Classifier for vehicles / single items", "pronunciation": "chyek",
+         "accept": ["vehicle classifier", "classifier for vehicles", "piece"]},
+        {"vietnamese": "Được", "english": "Can / able to / okay", "pronunciation": "duok",
+         "accept": ["can", "able", "okay", "ok", "possible"]},
+        {"vietnamese": "Chưa", "english": "Not yet", "pronunciation": "chua",
+         "accept": ["not yet", "yet", "havent"]},
+    ],
+    "connectors": [
+        {"vietnamese": "Và", "english": "And", "pronunciation": "va", "accept": ["and"]},
+        {"vietnamese": "Nhưng", "english": "But", "pronunciation": "nyung",
+         "accept": ["but", "however"]},
+        {"vietnamese": "Hoặc", "english": "Or", "pronunciation": "hwak", "accept": ["or"]},
+        {"vietnamese": "Vì", "english": "Because", "pronunciation": "vee",
+         "accept": ["because", "since", "cause"]},
+        {"vietnamese": "Nên", "english": "So / therefore", "pronunciation": "nen",
+         "accept": ["so", "therefore", "thus"]},
+        {"vietnamese": "Nếu", "english": "If", "pronunciation": "new", "accept": ["if"]},
+        {"vietnamese": "Thì", "english": "Then", "pronunciation": "tee", "accept": ["then"]},
+        {"vietnamese": "Với", "english": "With", "pronunciation": "vuy",
+         "accept": ["with", "along with"]},
+        {"vietnamese": "Trong", "english": "In / inside", "pronunciation": "chong",
+         "accept": ["in", "inside"]},
+        {"vietnamese": "Ngoài", "english": "Outside", "pronunciation": "ngwai",
+         "accept": ["outside", "out"]},
+        {"vietnamese": "Trên", "english": "On / above", "pronunciation": "chen",
+         "accept": ["on", "above", "on top"]},
+        {"vietnamese": "Dưới", "english": "Under / below", "pronunciation": "yuey",
+         "accept": ["under", "below", "beneath"]},
+        {"vietnamese": "Trước", "english": "Before / in front", "pronunciation": "chuok",
+         "accept": ["before", "in front", "in front of", "ahead"]},
+        {"vietnamese": "Sau", "english": "After / behind", "pronunciation": "shaow",
+         "accept": ["after", "behind", "later"]},
+        {"vietnamese": "Cho", "english": "For / to give (to)", "pronunciation": "cho",
+         "accept": ["for", "to", "to give"]},
+        {"vietnamese": "Từ", "english": "From", "pronunciation": "too", "accept": ["from"]},
+        {"vietnamese": "Đến", "english": "To / until", "pronunciation": "den",
+         "accept": ["to", "until", "up to"]},
+        {"vietnamese": "Giữa", "english": "Between / in the middle", "pronunciation": "yua",
+         "accept": ["between", "in the middle", "middle", "among"]},
+    ],
+    "sentences": [
+        {"vietnamese": "Tôi là người Mỹ", "english": "I am American", "pronunciation": "toy la nguy mee",
+         "accept": ["im american", "i am american", "im from america"]},
+        {"vietnamese": "Tôi là sinh viên", "english": "I am a student", "pronunciation": "toy la shing vyen",
+         "accept": ["im a student", "i am a student", "student"]},
+        {"vietnamese": "Tôi thích ăn phở", "english": "I like to eat pho", "pronunciation": "toy thik an fuh",
+         "accept": ["i like pho", "i like to eat pho", "i like eating pho"]},
+        {"vietnamese": "Tôi không biết", "english": "I don't know", "pronunciation": "toy khom byet",
+         "accept": ["i dont know", "dont know", "idk", "no idea"]},
+        {"vietnamese": "Tôi không hiểu tiếng Việt", "english": "I don't understand Vietnamese", "pronunciation": "toy khom hyew tee-eng vyet",
+         "accept": ["i dont understand vietnamese", "dont understand vietnamese", "no vietnamese"]},
+        {"vietnamese": "Bạn ăn cơm chưa?", "english": "Have you eaten yet? (common greeting)", "pronunciation": "bahn an kuhm chua",
+         "accept": ["have you eaten", "have you eaten yet", "did you eat", "you eaten"]},
+        {"vietnamese": "Bạn bao nhiêu tuổi?", "english": "How old are you?", "pronunciation": "bahn bow nyew twoy",
+         "accept": ["how old are you", "how old", "your age"]},
+        {"vietnamese": "Đi đâu vậy?", "english": "Where are you going?", "pronunciation": "dee dow vai",
+         "accept": ["where are you going", "where you going", "going where"]},
+        {"vietnamese": "Hôm nay trời đẹp", "english": "The weather is nice today", "pronunciation": "hohm nai chuhy dep",
+         "accept": ["weather is nice today", "nice weather today", "today weather is nice", "today is nice"]},
+        {"vietnamese": "Cho tôi một ly cà phê", "english": "Give me a cup of coffee", "pronunciation": "cho toy moht lee ka feh",
+         "accept": ["give me a coffee", "one coffee please", "a cup of coffee", "coffee please"]},
+        {"vietnamese": "Rất vui được gặp bạn", "english": "Nice to meet you", "pronunciation": "rut vwee duok gahp bahn",
+         "accept": ["nice to meet you", "pleased to meet you", "good to meet you"]},
+        {"vietnamese": "Tôi không nói được tiếng Việt", "english": "I can't speak Vietnamese", "pronunciation": "toy khom noy duok tee-eng vyet",
+         "accept": ["i cant speak vietnamese", "cant speak vietnamese", "no speak vietnamese"]},
+        {"vietnamese": "Cái này là gì?", "english": "What is this?", "pronunciation": "kai nai la yi",
+         "accept": ["what is this", "whats this", "this is what"]},
+        {"vietnamese": "Cái này bao nhiêu tiền?", "english": "How much is this?", "pronunciation": "kai nai bow nyew tee-en",
+         "accept": ["how much is this", "how much", "whats the price", "price of this"]},
+        {"vietnamese": "Tôi đói bụng quá", "english": "I'm so hungry", "pronunciation": "toy doy boong kwa",
+         "accept": ["im so hungry", "so hungry", "im really hungry", "im hungry"]},
+        {"vietnamese": "Không sao", "english": "It's okay / no problem", "pronunciation": "khom sao",
+         "accept": ["its okay", "no problem", "its fine", "no worries", "np"]},
+        {"vietnamese": "Một chút thôi", "english": "Just a little", "pronunciation": "moht chut thoy",
+         "accept": ["just a little", "a little", "a bit", "just a bit"]},
+        {"vietnamese": "Trời ơi!", "english": "Oh my god! / Good heavens!", "pronunciation": "chuhy uy",
+         "accept": ["oh my god", "omg", "oh my", "good heavens", "oh no"]},
+        {"vietnamese": "Tôi yêu Việt Nam", "english": "I love Vietnam", "pronunciation": "toy yew vyet nahm",
+         "accept": ["i love vietnam", "love vietnam"]},
+        {"vietnamese": "Chúc ngủ ngon", "english": "Good night (sleep well)", "pronunciation": "chook ngoo ngon",
+         "accept": ["good night", "sleep well", "gn", "sweet dreams"]},
+        {"vietnamese": "Bạn có khỏe không?", "english": "Are you well? / How are you?", "pronunciation": "bahn co kweh khom",
+         "accept": ["are you well", "how are you", "you doing well", "you ok"]},
+        {"vietnamese": "Tôi sống ở Sài Gòn", "english": "I live in Saigon", "pronunciation": "toy shohng uh sai gon",
+         "accept": ["i live in saigon", "live in saigon", "i live in ho chi minh"]},
+        {"vietnamese": "Tôi uống nước", "english": "I drink water", "pronunciation": "toy uohng nuoc",
+         "accept": ["i drink water", "drink water", "im drinking water"]},
+        {"vietnamese": "Tôi không ăn cay", "english": "I don't eat spicy food", "pronunciation": "toy khom an kai",
+         "accept": ["i dont eat spicy", "no spicy", "i dont eat spicy food", "not spicy for me"]},
+        {"vietnamese": "Bố mẹ tôi ở Việt Nam", "english": "My parents are in Vietnam", "pronunciation": "bo me toy uh vyet nahm",
+         "accept": ["my parents are in vietnam", "parents in vietnam", "my mom and dad are in vietnam"]},
+        {"vietnamese": "Tôi có một em gái", "english": "I have one younger sister", "pronunciation": "toy co moht em gai",
+         "accept": ["i have a younger sister", "i have one younger sister", "i have a little sister", "i have one little sister"]},
+        {"vietnamese": "Hôm nay là thứ Hai", "english": "Today is Monday", "pronunciation": "hohm nai la too hai",
+         "accept": ["today is monday", "its monday", "monday today"]},
+        {"vietnamese": "Ngày mai tôi bận", "english": "Tomorrow I'm busy", "pronunciation": "ngai mai toy bun",
+         "accept": ["tomorrow im busy", "im busy tomorrow", "busy tomorrow"]},
+        {"vietnamese": "Hôm nay trời mưa", "english": "It's raining today", "pronunciation": "hohm nai chuhy mua",
+         "accept": ["its raining today", "raining today", "today its raining"]},
+        {"vietnamese": "Trời nóng quá", "english": "It's so hot", "pronunciation": "chuhy nohng kwa",
+         "accept": ["its so hot", "so hot", "its too hot", "very hot"]},
+        {"vietnamese": "Tôi đi xe máy", "english": "I go by motorbike", "pronunciation": "toy dee se mai",
+         "accept": ["i go by motorbike", "i ride a motorbike", "by motorbike", "i take a motorbike"]},
+        {"vietnamese": "Tôi thích màu đỏ", "english": "I like red", "pronunciation": "toy thik mau do",
+         "accept": ["i like red", "i like the color red", "red is my favorite"]},
+        {"vietnamese": "Tôi rất vui", "english": "I'm very happy", "pronunciation": "toy rut vwee",
+         "accept": ["im very happy", "im so happy", "very happy"]},
+        {"vietnamese": "Cái này rất đẹp", "english": "This is very beautiful", "pronunciation": "kai nai rut dep",
+         "accept": ["this is very beautiful", "this is very pretty", "so beautiful", "very pretty"]},
+        {"vietnamese": "Cái đó đắt quá", "english": "That's too expensive", "pronunciation": "kai do dut kwa",
+         "accept": ["thats too expensive", "too expensive", "that costs too much", "too pricey"]},
+        {"vietnamese": "Tôi muốn mua cái này", "english": "I want to buy this", "pronunciation": "toy muohn mua kai nai",
+         "accept": ["i want to buy this", "want to buy this", "ill buy this", "id like to buy this"]},
+        {"vietnamese": "Nhà vệ sinh ở đâu?", "english": "Where is the bathroom?", "pronunciation": "nya veh shing uh dow",
+         "accept": ["where is the bathroom", "where is the toilet", "bathroom where", "wheres the restroom"]},
+    ],
 }
 
 
 CATEGORY_ORDER = [
-    "numbers", "addressing", "daily", "questions", "common_verbs", "adjectives",
+    "numbers", "basics", "addressing", "daily", "questions", "connectors",
+    "common_verbs", "adjectives", "sentences",
     "ordering", "food", "shopping", "family", "emotions", "body",
     "colors", "time", "weather", "places", "transportation", "directions",
 ]
 CATEGORY_LABELS = {
     "numbers": ("Numbers (0-1000)", "📚"),
+    "basics": ("Basics (particles & grammar glue)", "🧱"),
     "addressing": ("Addressing People (by age)", "🙇"),
     "daily": ("Daily Phrases", "💬"),
     "questions": ("Question Words", "❓"),
+    "connectors": ("Connectors & Prepositions", "🔗"),
     "common_verbs": ("Common Verbs", "🏃"),
     "adjectives": ("Adjectives", "🎨"),
+    "sentences": ("Sentence Patterns", "📝"),
     "ordering": ("Ordering & Restaurant", "🛍️"),
     "food": ("Food & Drinks", "🍜"),
     "shopping": ("Shopping & Money", "💰"),
@@ -575,7 +759,7 @@ def save_progress(progress):
         with open(PROGRESS_FILE, "w", encoding="utf-8") as f:
             json.dump(progress, f, ensure_ascii=False, indent=2)
     except OSError as e:
-        print(f"  [Could not save progress: {e}]")
+        print(f"  [Could not save progress to {PROGRESS_FILE}: {e}]")
 
 
 def update_streak(progress):
@@ -680,7 +864,8 @@ def run_quiz(words, progress, *, limit=None):
                 print(f"✗ Incorrect. Correct answer: {english}")
                 accepted = sorted(_acceptable_variants(word_item))
                 if len(accepted) > 1:
-                    print(f"   (also accepts: {', '.join(a for a in accepted if a != english.lower())})")
+                    primary = _clean(english)
+                    print(f"   (also accepts: {', '.join(a for a in accepted if a != primary)})")
                 record_result(progress, word_item, False)
             break
 
@@ -716,7 +901,7 @@ def all_words():
 
 
 def weak_words(progress, threshold=0.7):
-    """Return words with accuracy below threshold, or never-seen-but-missed."""
+    """Return seen words whose accuracy is below threshold."""
     weak = []
     for word in all_words():
         acc = word_accuracy(progress, word)
@@ -783,9 +968,6 @@ def show_vocabulary_list(category_name, words):
         print(f"Vietnamese:    {word['vietnamese']}")
         print(f"English:       {word['english']}")
         print(f"Pronunciation: {word['pronunciation']}")
-        accept = word.get("accept") or []
-        if accept:
-            print(f"Also accepts:  {', '.join(accept)}")
         print("-" * 40)
 
 
@@ -823,6 +1005,7 @@ def browse_vocabulary():
         key = CATEGORY_ORDER[idx]
         label, _ = CATEGORY_LABELS[key]
         show_vocabulary_list(label, vocabulary[key])
+        input("\nPress Enter to return to the menu...")
 
 
 def main():
@@ -843,6 +1026,7 @@ def main():
             break
         if choice == "s":
             show_stats(progress)
+            input("\nPress Enter to return to the menu...")
             continue
         if choice == "v":
             browse_vocabulary()
